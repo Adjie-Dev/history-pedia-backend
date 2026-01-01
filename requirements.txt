@@ -1,6 +1,8 @@
+cat > requirements.txt << 'EOF'
 flask
 flask-cors
-pymongo
 python-dotenv
 cerebras-cloud-sdk
 gunicorn
+mysql-connector-python
+EOF
