@@ -122,7 +122,7 @@ def delete_chat(chat_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
-# User endpoints (optional - untuk authentication nanti)
+# User endpoints
 @app.route('/api/users', methods=['POST'])
 def create_user():
     try:
