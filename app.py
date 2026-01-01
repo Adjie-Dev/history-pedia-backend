@@ -12,7 +12,7 @@ app = Flask(__name__)
 allowed_origins = [
     "http://localhost:3000",
     "http://localhost:5173",
-    os.environ.get('FRONTEND_URL', 'https://historypedia.vercel.app')
+    'https://historypedia.vercel.app'
 ]
 CORS(app, origins=allowed_origins)
 
