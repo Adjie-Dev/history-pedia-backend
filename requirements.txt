@@ -1,5 +1,6 @@
-Flask==3.0.0
-flask-cors==4.0.0
-python-dotenv==1.0.0
-cerebras-cloud-sdk==1.0.0
-gunicorn==21.2.0
+flask
+flask-cors
+pymongo
+python-dotenv
+cerebras-cloud-sdk
+gunicorn
