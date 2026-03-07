@@ -21,7 +21,7 @@ class Database:
             print(f"Error: {e}")
             return None
     
-    def save_chat(self, user_id, user_message, ai_response, model='llama-3.3-70b'):
+    def save_chat(self, user_id, user_message, ai_response, model='llama-3.3-70b-versatile'):
         conn = self.connect()
         if conn:
             try:

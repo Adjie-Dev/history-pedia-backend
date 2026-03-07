@@ -39,7 +39,7 @@ def chat():
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": user_message}
             ],
-            model="llama-3.3-70b",
+            model="llama3.1-8b",
             max_completion_tokens=1024,
             temperature=0.2,
             top_p=1,
@@ -48,7 +48,10 @@ def chat():
         
         answer = completion.choices[0].message.content
         
-        db.save_chat(user_id, user_message, answer, "llama-3.3-70b")
+        try:
+            db.save_chat(user_id, user_message, answer, "llama3.1-8b")
+        except Exception as db_err:
+            print(f"DB save skipped: {db_err}")
         
         return jsonify({'response': answer})
     
