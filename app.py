@@ -39,7 +39,7 @@ def chat():
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": user_message}
             ],
-            model="llama3.1-8b",
+            model="gpt-oss-120b",
             max_completion_tokens=1024,
             temperature=0.2,
             top_p=1,
@@ -49,7 +49,7 @@ def chat():
         answer = completion.choices[0].message.content
         
         try:
-            db.save_chat(user_id, user_message, answer, "llama3.1-8b")
+            db.save_chat(user_id, user_message, answer, "gpt-oss-120b")
         except Exception as db_err:
             print(f"DB save skipped: {db_err}")
         
