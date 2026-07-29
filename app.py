@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
 from dotenv import load_dotenv
-from cerebras.cloud.sdk import Cerebras
+from groq import Groq, RateLimitError
 from database import db
 
 load_dotenv()
@@ -16,11 +16,13 @@ allowed_origins = [
 ]
 CORS(app, origins=allowed_origins)
 
-cerebras_api_key = os.getenv('CEREBRAS_API_KEY')
-if not cerebras_api_key:
-    raise ValueError("CEREBRAS_API_KEY not found in environment variables")
+groq_api_key = os.getenv('GROQ_API_KEY')
+if not groq_api_key:
+    raise ValueError("GROQ_API_KEY not found in environment variables")
 
-client = Cerebras(api_key=cerebras_api_key)
+client = Groq(api_key=groq_api_key)
+
+LLM_MODEL = os.getenv('LLM_MODEL', 'openai/gpt-oss-120b')
 
 SYSTEM_PROMPT = """You are a history assistant. ONLY answer questions about history. If asked about non-history topics, say: "Sorry, I only answer history questions." Answer in Indonesian."""
 
@@ -39,7 +41,7 @@ def chat():
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": user_message}
             ],
-            model="gpt-oss-120b",
+            model=LLM_MODEL,
             max_completion_tokens=1024,
             temperature=0.2,
             top_p=1,
@@ -49,12 +51,15 @@ def chat():
         answer = completion.choices[0].message.content
         
         try:
-            db.save_chat(user_id, user_message, answer, "gpt-oss-120b")
+            db.save_chat(user_id, user_message, answer, LLM_MODEL)
         except Exception as db_err:
             print(f"DB save skipped: {db_err}")
-        
+
         return jsonify({'response': answer})
-    
+
+    except RateLimitError:
+        return jsonify({'error': 'Terlalu banyak permintaan. Tunggu sebentar lalu coba lagi.'}), 429
+
     except Exception as e:
         print(f"Error: {str(e)}")
         return jsonify({'error': str(e)}), 500

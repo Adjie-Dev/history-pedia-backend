@@ -1,27 +1,44 @@
+import os
 import mysql.connector
 from mysql.connector import Error
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class Database:
     def __init__(self):
-        self.host = 'adjiee.mysql.pythonanywhere-services.com'
-        self.database = 'adjiee$default'
-        self.user = 'adjiee'
-        self.password = 'felirHytam69!'
-    
+        self.host = os.getenv('DB_HOST')
+        self.database = os.getenv('DB_NAME')
+        self.user = os.getenv('DB_USER')
+        self.password = os.getenv('DB_PASSWORD')
+        self.port = int(os.getenv('DB_PORT', '3306'))
+        self.ssl_ca = os.getenv('DB_SSL_CA')
+
+        # Vercel menjalankan function dari working directory yang bukan root repo,
+        # jadi path relatif harus diikat ke lokasi file ini.
+        if self.ssl_ca and not os.path.isabs(self.ssl_ca):
+            self.ssl_ca = os.path.join(os.path.dirname(os.path.abspath(__file__)), self.ssl_ca)
+
     def connect(self):
         try:
-            connection = mysql.connector.connect(
-                host=self.host,
-                database=self.database,
-                user=self.user,
-                password=self.password
-            )
+            options = {
+                'host': self.host,
+                'database': self.database,
+                'user': self.user,
+                'password': self.password,
+                'port': self.port
+            }
+
+            if self.ssl_ca:
+                options['ssl_ca'] = self.ssl_ca
+
+            connection = mysql.connector.connect(**options)
             return connection
         except Error as e:
             print(f"Error: {e}")
             return None
     
-    def save_chat(self, user_id, user_message, ai_response, model='llama-3.3-70b-versatile'):
+    def save_chat(self, user_id, user_message, ai_response, model):
         conn = self.connect()
         if conn:
             try:
