@@ -23,6 +23,7 @@ if not groq_api_key:
 client = Groq(api_key=groq_api_key)
 
 LLM_MODEL = os.getenv('LLM_MODEL', 'openai/gpt-oss-120b')
+MAX_TOKENS = int(os.getenv('MAX_TOKENS', '4096'))
 
 SYSTEM_PROMPT = """You are a history assistant. ONLY answer questions about history. If asked about non-history topics, say: "Sorry, I only answer history questions." Answer in Indonesian."""
 
@@ -42,14 +43,19 @@ def chat():
                 {"role": "user", "content": user_message}
             ],
             model=LLM_MODEL,
-            max_completion_tokens=1024,
+            max_completion_tokens=MAX_TOKENS,
             temperature=0.2,
             top_p=1,
             stream=False
         )
         
         answer = completion.choices[0].message.content
-        
+
+        # Jangan biarkan jawaban putus tanpa penjelasan apa pun ke pengguna.
+        if completion.choices[0].finish_reason == 'length':
+            answer += "\n\n_(Jawaban terpotong karena terlalu panjang. Coba tanyakan bagian yang lebih spesifik.)_"
+
+
         try:
             db.save_chat(user_id, user_message, answer, LLM_MODEL)
         except Exception as db_err:
